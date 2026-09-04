@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c9efc52cb153d9ca524b4fc186771be3",
+    "content-hash": "c79145b78fae45b0faf2bdd8b6e8927f",
     "packages": [
         {
             "name": "doctrine/deprecations",
@@ -387,11 +387,17 @@
         },
         {
             "name": "interserver/mcp-openapi-core",
-            "version": "0.1.0",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/interserver/mcp-openapi-core.git",
+                "reference": "81d4f018e6f6d5a5871d0f740a293466a9573e0f"
+            },
             "dist": {
-                "type": "path",
-                "url": "../mcp-openapi-core",
-                "reference": "aba084080ad1e8ed564dba46f69214c423d2c88a"
+                "type": "zip",
+                "url": "https://api.github.com/repos/interserver/mcp-openapi-core/zipball/81d4f018e6f6d5a5871d0f740a293466a9573e0f",
+                "reference": "81d4f018e6f6d5a5871d0f740a293466a9573e0f",
+                "shasum": ""
             },
             "require": {
                 "ext-json": "*",
@@ -449,10 +455,11 @@
                 "proprietary"
             ],
             "description": "Shared core for InterServer's MCP servers: OpenAPI-to-tools translation, upstream proxying, and OAuth resource-server auth.",
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
+            "support": {
+                "source": "https://github.com/interserver/mcp-openapi-core/tree/v0.1.0",
+                "issues": "https://github.com/interserver/mcp-openapi-core/issues"
+            },
+            "time": "2026-09-04T23:33:17+00:00"
         },
         {
             "name": "laminas/laminas-httphandlerrunner",

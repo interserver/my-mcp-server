@@ -24,14 +24,8 @@
     },
     "repositories": [
         {
-            "type": "path",
-            "url": "../mcp-openapi-core",
-            "options": {
-                "symlink": true,
-                "versions": {
-                    "interserver/mcp-openapi-core": "0.1.0"
-                }
-            }
+            "type": "vcs",
+            "url": "git@github.com:interserver/mcp-openapi-core.git"
         }
     ],
     "config": {
