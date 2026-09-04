@@ -1,0 +1,60 @@
+{
+    "name": "interserver/my-mcp-server",
+    "description": "MCP server for the InterServer client and public APIs \u2014 mcp.interserver.net",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.3",
+        "ext-json": "*",
+        "interserver/mcp-openapi-core": "^0.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6",
+        "phpstan/phpstan": "^1.11"
+    },
+    "autoload": {
+        "psr-4": {
+            "InterServer\\Mcp\\App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "InterServer\\Mcp\\App\\Tests\\": "tests/"
+        }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../mcp-openapi-core",
+            "options": {
+                "symlink": true,
+                "versions": {
+                    "interserver/mcp-openapi-core": "0.1.0"
+                }
+            }
+        }
+    ],
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": "phpunit",
+        "phpstan": "phpstan analyse --memory-limit=512M",
+        "warm-cache": "vendor/bin/warm-cache --config=config/profiles.php --cache-dir=var/cache",
+        "post-install-cmd": [
+            "@ensure-dirs"
+        ],
+        "post-update-cmd": [
+            "@ensure-dirs"
+        ],
+        "ensure-dirs": [
+            "@php bin/ensure-dirs"
+        ],
+        "ci": [
+            "@phpstan",
+            "@test"
+        ]
+    },
+    "minimum-stability": "stable"
+}

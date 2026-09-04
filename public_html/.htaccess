@@ -1,0 +1,51 @@
+# mcp.interserver.net
+#
+# Everything routes to index.php. Nothing here is served directly, and no URL in
+# this application ends in .php — which also sidesteps the origin deployment's
+# `ProxyPassMatch ^/(.*\.php(/.*)?)$` trap entirely. See the vhost notes.
+
+# Without this the Authorization header never reaches PHP-FPM, and every OAuth
+# request looks unauthenticated. It is the single most common cause of "the
+# connector asks me to log in again immediately".
+CGIPassAuth On
+SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
+
+# Without this, `Accept: application/json, text/event-stream` is content-negotiated
+# against files on disk and returns 406 before any PHP runs.
+Options -MultiViews
+Options -Indexes
+
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Existing files (the docs page, favicon) are served as-is.
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # Everything else — including /.well-known/oauth-protected-resource/* — is the
+    # application's. It builds those documents from the request, so they stay
+    # correct on staging and production without a second copy.
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+# Production runs LiteSpeed, where an <IfModule mod_rewrite.c> block does not
+# fire. The rules must be written twice; that is not redundancy.
+<IfModule Litespeed>
+    RewriteEngine On
+
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+# Discovery documents must never be cached: a stale scope list breaks a client's
+# authorize request, and discovery docs are cached globally by URL for ~5 minutes
+# if you let them be. index.php sets this too; belt and braces.
+<IfModule mod_headers.c>
+    <FilesMatch "^index\.php$">
+        Header always set Cache-Control "no-store, max-age=0" env=MCP_DISCOVERY
+    </FilesMatch>
+</IfModule>

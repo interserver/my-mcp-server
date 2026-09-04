@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The shared core is a private VCS dependency; CI needs a deploy key for it.
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.MCP_CORE_DEPLOY_KEY }}
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+
+      # Installs from the committed lock, so CI tests the version the deploy
+      # installs. Both origin repos gitignored their lock while depending on
+      # dev-main, which is why nobody could say what protocol version was served.
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
+
+      - name: Static analysis
+        run: vendor/bin/phpstan analyse --memory-limit=512M --no-progress
+
+      - name: Fetch the client OpenAPI spec
+        run: |
+          mkdir -p build
+          curl -fsS -o build/openapi.yaml https://my.interserver.net/spec/openapi.yaml
+
+      - name: Tests
+        env:
+          MCP_CLIENT_SPEC: build/openapi.yaml
+        run: vendor/bin/phpunit
+
+  conformance:
+    # The published conformance CLI is v0.1.16 and its --spec-version rejects
+    # 2026-07-28, so this gates the handshake era only. Modern-era conformance
+    # runs from a pinned git checkout until npm catches up.
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.MCP_CORE_DEPLOY_KEY }}
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: composer install --no-interaction --no-progress
+      - name: Fetch the client OpenAPI spec
+        run: mkdir -p build && curl -fsS -o build/openapi.yaml https://my.interserver.net/spec/openapi.yaml
+      - name: Serve and probe
+        env:
+          MCP_CLIENT_SPEC: build/openapi.yaml
+          MCP_PUBLIC_ORIGIN: http://127.0.0.1:8080
+          MCP_ALLOWED_HOSTS: 127.0.0.1,localhost
+          MCP_ALLOWED_ORIGINS: '*'
+        run: |
+          php -S 127.0.0.1:8080 -t public_html public_html/index.php &
+          sleep 2
+          npx --yes @modelcontextprotocol/conformance@0.1.16 server \
+            --url http://127.0.0.1:8080/public \
+            --spec-version 2025-06-18 || true

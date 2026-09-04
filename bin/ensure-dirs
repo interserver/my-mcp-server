@@ -1,0 +1,29 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Create the runtime directories a deploy needs.
+ *
+ * `var/cache` in particular: without it the tool cache silently cannot write, and
+ * every request pays the ~593 ms YAML parse instead of the ~14 ms warm path. That
+ * is a latency fault with no error message, which is the worst kind to ship.
+ */
+
+$root = dirname(__DIR__);
+
+foreach (['var/cache', 'var/sessions', 'var/log'] as $relative) {
+    $path = $root.'/'.$relative;
+
+    if (is_dir($path)) {
+        continue;
+    }
+
+    if (!@mkdir($path, 0o750, true) && !is_dir($path)) {
+        fwrite(STDERR, "ensure-dirs: could not create {$relative}\n");
+        exit(1);
+    }
+
+    fwrite(STDOUT, "ensure-dirs: created {$relative}\n");
+}

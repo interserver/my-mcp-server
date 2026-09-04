@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         verbose="true"
+         cacheResultFile=".phpunit.cache/test-results"
+         failOnWarning="true"
+         failOnRisky="true">
+  <testsuites>
+    <!-- This repo is configuration over a shared, separately tested core, so its
+         own tests are about the configuration: that the profiles say what they
+         mean, that the scope map has not drifted from the API's copy, and that a
+         real request through the real front controller behaves. -->
+    <testsuite name="Config">
+      <directory suffix="Test.php">tests/Config</directory>
+    </testsuite>
+    <testsuite name="Integration">
+      <directory suffix="Test.php">tests/Integration</directory>
+    </testsuite>
+  </testsuites>
+  <coverage>
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+  </coverage>
+  <php>
+    <!-- Points the parity test at the API repo. Absent, that test skips. -->
+    <env name="MYADMIN_ROOT" value=""/>
+    <env name="MCP_CLIENT_SPEC" value=""/>
+  </php>
+</phpunit>
