@@ -34,6 +34,45 @@ return static function (Config $config): array {
 
     $scopeMap = ScopeMap::forClient(require __DIR__.'/scope-map.php');
 
+    /**
+     * Side-effecting GETs.
+     *
+     * This API exposes 20 operations that mutate on a GET — stopping and restarting
+     * VPSes and QuickServers, blocking SMTP, toggling DDoS scrubbing, destroying a
+     * session. HTTP semantics say a GET is safe, so without these patterns the parser
+     * annotates every one of them `readOnlyHint: true`.
+     *
+     * That is not a cosmetic error. `readOnlyHint` is what a client consults to
+     * decide whether an action needs the user's confirmation, so a tool that stops
+     * someone's server or spends their money was advertised as safe to call
+     * speculatively.
+     *
+     * The patterns are matched against the operationId rather than the path because
+     * the paths have nothing in common — `/vps/{id}/stop`, `/logout` and
+     * `/servers/order/buy_now_server` share no fragment — while the naming
+     * convention is consistent: an action is a verb.
+     *
+     * Verified against both live specs by reading each operation's description
+     * rather than guessing from its name: these flag exactly those 20 GETs, catch no
+     * read operation, and change nothing on the admin surface.
+     *
+     * `buyItNowServerOrder` is the near-miss worth naming. It reads like a purchase
+     * and is not one — it is step 1 of the order flow and returns configurable
+     * options so the form can be rendered; `placeBuyNowServer` (POST) is what creates
+     * the invoice. A `^(buy|order|purchase)` pattern looks obviously right and would
+     * mark a read destructive.
+     */
+    $destructive = new DestructiveClassifier(
+        operationIdPatterns: [
+            // doVpsStop, doQsRestart, doVpsBlockSmtp, doVpsEjectCd, ...
+            '/^do[A-Z]/',
+            // Logout, logoutAccountOauth — ends a session.
+            '/^logout/i',
+            // enableScrub, disableScrub.
+            '/^(enable|disable)[A-Z]/',
+        ],
+    );
+
     return [
         'client' => [
             // Fetched over HTTP: the spec belongs to the API, not to this server, and
@@ -53,7 +92,7 @@ return static function (Config $config): array {
             // Claude compares literally, and this is the check that stops an
             // admin-audience token being replayed here.
             'resourceIdentifiers' => [$publicOrigin.'/client'],
-            'destructiveClassifier' => new DestructiveClassifier(),
+            'destructiveClassifier' => $destructive,
             // experimental-ext-server-card, at the reserved
             // <streamable-http-url>/server-card path. Rendered from a real
             // server/discover against this very server, so the card and the live
@@ -77,7 +116,7 @@ return static function (Config $config): array {
             'scopeMap' => null,
             'authRealm' => 'interserver-public',
             'resourceIdentifiers' => [$publicOrigin.'/public'],
-            'destructiveClassifier' => new DestructiveClassifier(),
+            'destructiveClassifier' => $destructive,
             // The public surface gets one too: it is the surface an unauthenticated
             // client meets first, so it is the one a card helps most.
             'servesServerCard' => true,

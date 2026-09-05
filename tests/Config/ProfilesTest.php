@@ -232,4 +232,82 @@ final class ProfilesTest extends TestCase
             'the public surface is an allowlist over the client spec, not a spec of its own'
         );
     }
+
+    // ------------------------------------------------------------------------
+    // Side-effecting GETs.
+    //
+    // `readOnlyHint` is what a client consults to decide whether an action needs
+    // the user's confirmation. This API has GETs that stop a VPS, block SMTP and
+    // place an order, and HTTP semantics alone would annotate every one of them
+    // read-only — i.e. safe to call speculatively, without asking.
+    // ------------------------------------------------------------------------
+
+    /**
+     * @dataProvider sideEffectingGets
+     */
+    public function testAGetThatMutatesIsNotAdvertisedAsReadOnly(string $operationId, string $path): void
+    {
+        $classifier = self::registry()->get('client')->destructiveClassifier;
+        self::assertNotNull($classifier);
+
+        self::assertTrue(
+            $classifier->isDestructive('GET', $path, $operationId),
+            "{$operationId} mutates on GET; unflagged it is annotated readOnlyHint:true, which tells a client it needs no confirmation"
+        );
+    }
+
+    /** @return array<string, array{0: string, 1: string}> */
+    public static function sideEffectingGets(): array
+    {
+        return [
+            'stops a vps' => ['doVpsStop', '/vps/{id}/stop'],
+            'restarts a vps' => ['doVpsRestart', '/vps/{id}/restart'],
+            'starts a vps' => ['doVpsStart', '/vps/{id}/start'],
+            'blocks smtp' => ['doVpsBlockSmtp', '/vps/{id}/block_smtp'],
+            'ejects a cd' => ['doVpsEjectCd', '/vps/{id}/eject_cd'],
+            'stops a quickserver' => ['doQsStop', '/qs/{id}/stop'],
+            'disables a scrub ip' => ['disableScrub', '/scrub_ips/{id}/disable'],
+            'enables a scrub ip' => ['enableScrub', '/scrub_ips/{id}/enable'],
+            'ends the session' => ['Logout', '/logout'],
+            'revokes an oauth session' => ['logoutAccountOauth', '/account/oauth/{name}/logout'],
+        ];
+    }
+
+    /**
+     * The other half of the same guarantee. Patterns broad enough to catch every
+     * action would also catch retrievals, and marking a read destructive trains
+     * users to click through confirmations — which costs the confirmation its
+     * meaning on the calls that matter.
+     *
+     * @dataProvider genuineReads
+     */
+    public function testAnOrdinaryReadIsStillReadOnly(string $operationId, string $path): void
+    {
+        $classifier = self::registry()->get('client')->destructiveClassifier;
+        self::assertNotNull($classifier);
+
+        self::assertFalse(
+            $classifier->isDestructive('GET', $path, $operationId),
+            "{$operationId} only reads; flagging it spends user attention on a confirmation that protects nothing"
+        );
+    }
+
+    /** @return array<string, array{0: string, 1: string}> */
+    public static function genuineReads(): array
+    {
+        return [
+            'list vps' => ['getVpsList', '/vps'],
+            'domain lookup' => ['getDomainLookup', '/domains/lookup'],
+            'marketplace servers' => ['getMPServers', '/servers/marketplace'],
+            'domain search' => ['getDomainSearch', '/domains/search'],
+            'account details' => ['getAccount', '/account'],
+            // Reads like a purchase and is not one: step 1 of the order flow,
+            // returning configurable options so the form can be rendered.
+            // placeBuyNowServer (POST) is what creates the invoice. A
+            // ^(buy|order|purchase) pattern looks right and would mark this
+            // destructive — the reason each of these was checked against its
+            // description rather than its name.
+            'order options, not an order' => ['buyItNowServerOrder', '/servers/order/buy_now_server'],
+        ];
+    }
 }

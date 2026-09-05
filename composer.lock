@@ -387,16 +387,16 @@
         },
         {
             "name": "interserver/mcp-openapi-core",
-            "version": "v0.2.2",
+            "version": "v0.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/interserver/mcp-openapi-core.git",
-                "reference": "32a28c4a01c9450e57305e1c4610dd8b381e9db7"
+                "reference": "1e5d63add836c1e3bfd0f2830e09834ed729b519"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/interserver/mcp-openapi-core/zipball/32a28c4a01c9450e57305e1c4610dd8b381e9db7",
-                "reference": "32a28c4a01c9450e57305e1c4610dd8b381e9db7",
+                "url": "https://api.github.com/repos/interserver/mcp-openapi-core/zipball/1e5d63add836c1e3bfd0f2830e09834ed729b519",
+                "reference": "1e5d63add836c1e3bfd0f2830e09834ed729b519",
                 "shasum": ""
             },
             "require": {
@@ -456,10 +456,10 @@
             ],
             "description": "Shared core for InterServer's MCP servers: OpenAPI-to-tools translation, upstream proxying, and OAuth resource-server auth.",
             "support": {
-                "source": "https://github.com/interserver/mcp-openapi-core/tree/v0.2.2",
+                "source": "https://github.com/interserver/mcp-openapi-core/tree/v0.2.3",
                 "issues": "https://github.com/interserver/mcp-openapi-core/issues"
             },
-            "time": "2026-09-05T02:33:39+00:00"
+            "time": "2026-09-05T20:53:59+00:00"
         },
         {
             "name": "laminas/laminas-httphandlerrunner",
