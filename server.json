@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "net.interserver/my-mcp-server",
+  "title": "InterServer",
+  "description": "Manage InterServer hosting: VPS, domains, DNS, SSL, mail, backups and billing.",
+  "version": "1.0.0",
+  "websiteUrl": "https://www.interserver.net/",
+  "repository": {
+    "url": "https://github.com/interserver/my-mcp-server",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.interserver.net/client"
+    }
+  ]
+}

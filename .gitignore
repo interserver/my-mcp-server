@@ -3,3 +3,6 @@
 /coverage/
 /.phpunit.cache/
 .phpunit.result.cache
+
+# Registry namespace signing key — never in the repo, even by accident.
+*.pem
