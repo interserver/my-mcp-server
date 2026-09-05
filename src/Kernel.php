@@ -17,6 +17,7 @@ use InterServer\Mcp\Core\Support\RedisCache;
 use Mcp\Server\Session\FileSessionStore;
 use Mcp\Server\Session\Psr16SessionStore;
 use Mcp\Server\Session\SessionStoreInterface;
+use GuzzleHttp\ClientInterface as HttpClientInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -36,6 +37,16 @@ final class Kernel
     public function __construct(
         private readonly Config $config,
         private readonly string $projectRoot,
+        /**
+         * HTTP client used for token introspection.
+         *
+         * Injectable purely so a test can drive the real wiring — this Kernel, the real
+         * ProfileResolver, the real ServerFactory and the real SDK transport — with only
+         * the socket to the authorization server replaced. The cross-surface rejection
+         * test depends on that: it has to prove the 401 comes out of the assembled
+         * application, not merely out of a validator constructed by hand.
+         */
+        private readonly ?HttpClientInterface $introspectionHttp = null,
     ) {
     }
 
@@ -132,6 +143,7 @@ final class Kernel
             clientId: $clientId,
             clientSecret: $clientSecret,
             cache: $this->introspectionCache(),
+            http: $this->introspectionHttp,
             logger: $this->logger(),
         );
 
