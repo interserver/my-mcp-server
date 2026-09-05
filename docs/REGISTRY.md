@@ -58,7 +58,15 @@ record, or an endpoint that does not resolve. `DRY_RUN=1` runs the checks and
 stops.
 
 Requires [`mcp-publisher`](https://github.com/modelcontextprotocol/registry) on
-`PATH`.
+`PATH`. It is installed at `~/.local/bin/mcp-publisher` (v1.8.1); add that to
+`PATH` or install from the releases page.
+
+Preflight ends with `mcp-publisher validate`, which checks the manifest against
+the **live** registry. That is stronger than the local checks above — those exist
+to give a specific message for the mistakes that are easy to make, while the
+validator catches everything else, including schema changes made after this
+script was written. It runs before the environment checks, because a manifest
+problem is fixable here and now while a missing DNS record is not.
 
 ## Republishing
 

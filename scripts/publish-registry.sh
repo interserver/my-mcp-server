@@ -50,6 +50,17 @@ echo "  remote:  $URL"
 [[ "$VERSION" != *"^"* && "$VERSION" != *"~"* && "$VERSION" != *"*"* ]] \
     || fail "version '$VERSION' looks like a range; the registry rejects ranges"
 
+# The registry's own validator, against the live registry. Stronger than anything
+# checked above — those exist to give a specific message for the mistakes that are
+# easy to make, this catches everything else, including schema changes made after
+# this script was written.
+if ! mcp-publisher validate >/dev/null 2>&1; then
+    echo "mcp-publisher validate failed:" >&2
+    mcp-publisher validate >&2 || true
+    fail "$MANIFEST was rejected by the registry's validator"
+fi
+echo "  manifest validated against the live registry"
+
 # The key proves the namespace. Without it the publish fails as a signature
 # error, which reads like a protocol problem rather than a missing file.
 [[ -f "$KEY_PATH" ]] \
