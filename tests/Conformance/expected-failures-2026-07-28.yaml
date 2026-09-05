@@ -1,0 +1,32 @@
+# Conformance baseline — modern era (2026-07-28), pinned git checkout.
+#
+# The published CLI (v0.1.16) rejects `--spec-version 2026-07-28`, so this era is
+# gated on a pinned checkout of the conformance repository until npm catches up.
+# The pin lives in run.sh; move it deliberately, and re-baseline when you do.
+#
+# Five scenarios that fail in the handshake era pass here — `resources-subscribe`,
+# `resources-unsubscribe`, `tools-call-sampling`, `tools-call-with-logging` and
+# `tools-call-elicitation` are all handshake-era features the modern revision
+# removed, so the modern suite does not run them at all.
+#
+# `dns-rebinding-protection` and `server-sse-multiple-streams` PASS and are
+# deliberately absent from this list: both are real protocol behaviour this server
+# implements, and if either starts failing the build must break.
+#
+# Re-establish with:  ./tests/Conformance/run.sh --update
+server:
+  - completion-complete
+  - prompts-get-embedded-resource
+  - prompts-get-simple
+  - prompts-get-with-args
+  - prompts-get-with-image
+  - resources-read-binary
+  - resources-read-text
+  - resources-templates-read
+  - tools-call-audio
+  - tools-call-embedded-resource
+  - tools-call-error
+  - tools-call-image
+  - tools-call-mixed-content
+  - tools-call-simple-text
+  - tools-call-with-progress

@@ -1,0 +1,34 @@
+# Conformance baseline — handshake era (2025-06-18), released CLI v0.1.16.
+#
+# Every entry is a scenario that fails because this server does not define the
+# fixture tool, resource or prompt the scenario expects — not because of a protocol
+# fault. This is an OpenAPI proxy: its tools are the 311 operations in the client
+# spec, and none of them is named `conformance-test-tool`.
+#
+# The point of committing this is that a regression becomes a diff rather than a
+# judgement call. The CLI fails the build in BOTH directions:
+#   * a scenario failing that is not listed here  -> unexpected failure
+#   * a scenario listed here that now passes      -> stale entry, remove it
+#
+# Re-establish with:  ./tests/Conformance/run.sh --update
+server:
+  - completion-complete
+  - prompts-get-embedded-resource
+  - prompts-get-simple
+  - prompts-get-with-args
+  - prompts-get-with-image
+  - resources-read-binary
+  - resources-read-text
+  - resources-subscribe
+  - resources-templates-read
+  - resources-unsubscribe
+  - tools-call-audio
+  - tools-call-elicitation
+  - tools-call-embedded-resource
+  - tools-call-error
+  - tools-call-image
+  - tools-call-mixed-content
+  - tools-call-sampling
+  - tools-call-simple-text
+  - tools-call-with-logging
+  - tools-call-with-progress

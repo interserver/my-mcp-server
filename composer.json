@@ -35,6 +35,7 @@
     "scripts": {
         "test": "phpunit",
         "phpstan": "phpstan analyse --memory-limit=512M",
+        "conformance": "tests/Conformance/run.sh",
         "warm-cache": "vendor/bin/warm-cache --config=config/profiles.php --cache-dir=var/cache",
         "post-install-cmd": [
             "@ensure-dirs"
