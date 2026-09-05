@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c79145b78fae45b0faf2bdd8b6e8927f",
+    "content-hash": "12a37f3d0ff8f8565f7725b12a60e832",
     "packages": [
         {
             "name": "doctrine/deprecations",
@@ -387,16 +387,16 @@
         },
         {
             "name": "interserver/mcp-openapi-core",
-            "version": "v0.1.0",
+            "version": "v0.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/interserver/mcp-openapi-core.git",
-                "reference": "81d4f018e6f6d5a5871d0f740a293466a9573e0f"
+                "reference": "b0714dfe34094178cc69585377ce1c0baa2b08dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/interserver/mcp-openapi-core/zipball/81d4f018e6f6d5a5871d0f740a293466a9573e0f",
-                "reference": "81d4f018e6f6d5a5871d0f740a293466a9573e0f",
+                "url": "https://api.github.com/repos/interserver/mcp-openapi-core/zipball/b0714dfe34094178cc69585377ce1c0baa2b08dc",
+                "reference": "b0714dfe34094178cc69585377ce1c0baa2b08dc",
                 "shasum": ""
             },
             "require": {
@@ -456,10 +456,10 @@
             ],
             "description": "Shared core for InterServer's MCP servers: OpenAPI-to-tools translation, upstream proxying, and OAuth resource-server auth.",
             "support": {
-                "source": "https://github.com/interserver/mcp-openapi-core/tree/v0.1.0",
+                "source": "https://github.com/interserver/mcp-openapi-core/tree/v0.2.1",
                 "issues": "https://github.com/interserver/mcp-openapi-core/issues"
             },
-            "time": "2026-09-04T23:33:17+00:00"
+            "time": "2026-09-05T00:41:22+00:00"
         },
         {
             "name": "laminas/laminas-httphandlerrunner",

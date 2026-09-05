@@ -369,4 +369,89 @@ final class ServerBehaviourTest extends TestCase
             'this server must never advertise the admin superscope',
         );
     }
+
+    // ------------------------------------------------------------- server card
+
+    /**
+     * The card and `server/discover` report the same capabilities.
+     *
+     * This is the regression the card's whole design is built around. The previous
+     * implementation served a hand-written card advertising `tools` alone, while the
+     * SDK's capability detection reported five capabilities — so a client reading the
+     * card and a client calling the server disagreed about the same server. Asserting
+     * equality between the two live responses is the only form of this test that
+     * cannot itself go stale.
+     */
+    public function testTheServerCardAgreesWithServerDiscover(): void
+    {
+        [$body, $headers] = self::modern('server/discover');
+        $discovered = self::decode($this->send('POST', '/client', $body, $headers))['result']['capabilities'];
+
+        $card = json_decode((string) $this->send('GET', '/client/server-card')->getBody(), true);
+
+        self::assertSame($discovered, $card['capabilities']);
+    }
+
+    public function testTheServerCardIsServedAtTheReservedPath(): void
+    {
+        // `<streamable-http-url>/server-card`. The extension explicitly rejects the
+        // `/.well-known/mcp/server-card` form this codebase used to serve.
+        self::assertSame(200, $this->send('GET', '/client/server-card')->getStatusCode());
+    }
+
+    public function testTheServerCardUsesItsOwnMediaType(): void
+    {
+        self::assertSame(
+            'application/mcp-server-card+json',
+            $this->send('GET', '/client/server-card')->getHeaderLine('Content-Type'),
+        );
+    }
+
+    public function testTheServerCardIsReadableWithoutACredential(): void
+    {
+        // The card exists to tell a client that has no token how to get one. Gating
+        // it behind the token would make it useless for its only purpose.
+        $card = json_decode((string) $this->send('GET', '/client/server-card')->getBody(), true);
+
+        self::assertArrayHasKey('authentication', $card);
+    }
+
+    public function testAnEmptyCapabilitySurvivesAsAJsonObject(): void
+    {
+        // `"logging": []` is a different document from `"logging": {}` and a
+        // schema-validating client rejects the first. Assert on the raw bytes,
+        // because decoding to an associative array is exactly what hides this.
+        self::assertStringContainsString(
+            '"logging": {}',
+            (string) $this->send('GET', '/client/server-card')->getBody(),
+        );
+    }
+
+    public function testTheServerCardHonoursIfNoneMatch(): void
+    {
+        $first = $this->send('GET', '/client/server-card');
+        $etag = $first->getHeaderLine('ETag');
+
+        self::assertNotSame('', $etag);
+        self::assertSame(
+            304,
+            $this->send('GET', '/client/server-card', null, ['If-None-Match' => $etag])->getStatusCode(),
+        );
+    }
+
+    public function testThePublicSurfaceHasItsOwnCard(): void
+    {
+        $card = json_decode((string) $this->send('GET', '/public/server-card')->getBody(), true);
+
+        self::assertSame('InterServer Public API', $card['name']);
+    }
+
+    public function testThePublicCardDeclaresNoAuthentication(): void
+    {
+        // It takes no credential; an authentication block would send a client off to
+        // obtain one it does not need.
+        $card = json_decode((string) $this->send('GET', '/public/server-card')->getBody(), true);
+
+        self::assertArrayNotHasKey('authentication', $card);
+    }
 }

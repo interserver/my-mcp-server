@@ -54,6 +54,14 @@ return static function (Config $config): array {
             // admin-audience token being replayed here.
             'resourceIdentifiers' => [$publicOrigin.'/client'],
             'destructiveClassifier' => new DestructiveClassifier(),
+            // experimental-ext-server-card, at the reserved
+            // <streamable-http-url>/server-card path. Rendered from a real
+            // server/discover against this very server, so the card and the live
+            // result cannot disagree — which they did in the implementation this
+            // replaced, where a hand-written literal claimed `tools` alone while the
+            // server reported five capabilities.
+            'servesServerCard' => true,
+            'documentationUrl' => $origin.'/api-docs/',
         ],
 
         'public' => [
@@ -70,6 +78,10 @@ return static function (Config $config): array {
             'authRealm' => 'interserver-public',
             'resourceIdentifiers' => [$publicOrigin.'/public'],
             'destructiveClassifier' => new DestructiveClassifier(),
+            // The public surface gets one too: it is the surface an unauthenticated
+            // client meets first, so it is the one a card helps most.
+            'servesServerCard' => true,
+            'documentationUrl' => $origin.'/api-docs/',
         ],
     ];
 };
